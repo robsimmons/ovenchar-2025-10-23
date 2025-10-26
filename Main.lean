@@ -1,5 +1,7 @@
 import «20251023Facet»
 
+#eval x.read
+
 def main : IO Unit := do
   IO.println s!"x: {← x.read}!"
   IO.println s!"y: {← y.read}!"

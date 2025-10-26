@@ -4,6 +4,7 @@ import «20251023Facet».SecretPackage
 
 open Lean Std
 
+
 initialize secretPlaceholderExt : EnvExtension (Option Expr) ← registerEnvExtension (pure .none)
 initialize redactedStringExt : EnvExtension (Option String) ← registerEnvExtension (pure .none)
 initialize newFileExt : EnvExtension Bool ← registerEnvExtension (pure true)
@@ -19,7 +20,10 @@ elab "__REDACTED " s:str "__" : term => do
   else
     throwError "The `__REDACTED <str> __` syntax can only be used within a `secretive` definition."
 
-def storeSecret (key: Key) (str : String) : CoreM String := do
+def storeSecret (key: Key) (str : String) : CoreM (Option String) := do
+  if ← getBoolOption `Elab.inServer then
+    return .none
+
   let cwd := (← IO.currentDir).components.toArray
   let ctx ← readThe Core.Context
   let currFile : System.FilePath := System.FilePath.mk ctx.fileName

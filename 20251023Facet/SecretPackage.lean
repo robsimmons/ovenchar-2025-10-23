@@ -5,11 +5,13 @@ abbrev Key := UInt64
 
 structure SecretPackage a where
   func : (String → a)
-  file : String
+  file : Option String
   key : Key
 
 def SecretPackage.read : SecretPackage a -> IO a
   | .mk func file key => do
+    let .some file := file
+      | throw <| .userError "Secrets cannot be read in the file where they are defined when using the language server protocol"
     let keyStr := ToString.toString key ++ ":"
     let file := ((← IO.currentDir) / ".secrets" / s!"{file}.txt")
     for line in ← IO.FS.lines file do
